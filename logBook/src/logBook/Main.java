@@ -1,17 +1,22 @@
-package logbook;
+package logBook;
 
+import logBook.Borrower;
+import logBook.Borrowers;
+
+import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Main {
-    // Create an ArrayList to store borrowers
-    static ArrayList<Borrower> borrowers = new ArrayList<>();
+
     // Define admin username and password
     static String adminUsername = "admin";
     static String adminPassword = "123";
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
+        // Create an Object to store borrowers
+        Borrowers borrowersRepo = new Borrowers();
         while (true) {
             System.out.println("1. Log in as admin");
             System.out.println("2. Exit");
@@ -53,54 +58,49 @@ public class Main {
                             String name = in.nextLine();
 
                             // Create a new Borrower object and add it to the borrowers ArrayList
-                            borrowers.add(new Borrower(date, time, item, quantity, gradeLevel, section, name));
+                            borrowersRepo.addBorrower(new Borrower(
+                                    date,
+                                    time,
+                                    item,
+                                    quantity,
+                                    gradeLevel,
+                                    section,
+                                    name));
                             System.out.println("Borrower added successfully!");
                         } else if (adminChoice == 2) {
-                            if (borrowers.isEmpty()) {
+                            if (borrowersRepo.isEmpty()) {
                                 System.out.println("There are no borrowers for today. Try another option.");
                             } else {
                                 // View all borrowers
-                                for (Borrower borrower : borrowers) {
-                                    System.out.println(borrower);
-                                }
+                                borrowersRepo.viewAllBorrowers();
+
                             }
                         } else if (adminChoice == 3) {
-                            if (borrowers.isEmpty()) {
+                            if (borrowersRepo.isEmpty()) {
                                 System.out.println("There are no borrowers yet.");
                             } else {
                                 // Search for a borrower by name
+                                // Multiple borrowers could have the same name
+
                                 System.out.print("Enter name to search: ");
                                 String nameToSearch = in.nextLine();
-                                boolean borrowerFound = false;
-                                for (Borrower borrower : borrowers) {
-                                    if (borrower.getName().equals(nameToSearch)) {
-                                        System.out.println(borrower);
-                                        borrowerFound = true;
-                                    }
-                                }
-                                if (!borrowerFound) {
+                                List<Borrower> foundBorrowers = borrowersRepo.searchByName(nameToSearch);
+                                if (foundBorrowers.isEmpty()) {
                                     System.out.println("No borrower found with the given name.");
                                 }
+                                // Will not iterate for loop if borrowers are empty
+                                for (Borrower foundBorrower: foundBorrowers) {
+                                    System.out.println(foundBorrower);
+                                }
+
                             }
                         } else if (adminChoice == 4) {
                             System.out.print("Enter name to delete: ");
                             String nameToDelete = in.nextLine();
-                            boolean borrowerDeleted = false;
-                            Borrower borrowerToDelete = null;
+                            // Multiple borrowers could have the same name
+                            boolean hasDeleted = borrowersRepo.deleteBorrowerByName(nameToDelete);
+                            System.out.println(hasDeleted ? "Borrower deleted successfully!": "Borrower not found.");
 
-                            for (Borrower borrower : borrowers) {
-                                if (borrower.getName().equals(nameToDelete)) {
-                                    borrowerToDelete = borrower;
-                                    borrowerDeleted = true;
-                                    break;
-                                }
-                            }
-                            if (borrowerDeleted) {
-                                borrowers.remove(borrowerToDelete);
-                                System.out.println("Borrower deleted successfully!");
-                            } else {
-                                System.out.println("Borrower not found.");
-                            }
                         } else if (adminChoice == 5) {
                             // Logout from the admin account
                             break;
